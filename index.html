@@ -7,7 +7,7 @@
     return;
   }
 
-  const versionURL = "https://cdn.jsdelivr.net/gh/leo0803/reurl-data@latest/version.json";
+  const versionURL = "https://leo0803.github.io/reurl-data/version.json";
   const verKey = `ver_all`;
   const versionRes = await fetch(versionURL);
   const version = (await versionRes.json()).version;
@@ -21,7 +21,7 @@
   if (!needRefresh && localStorage.getItem(dataKey)) {
     data = JSON.parse(localStorage.getItem(dataKey));
   } else {
-    const dataURL = `https://cdn.jsdelivr.net/gh/leo0803/reurl-data@latest/${group}.json?v=${version}`;
+    const dataURL = `https://leo0803.github.io/reurl-data/${group}.json?v=${version}`;
     try {
       const res = await fetch(dataURL);
       data = await res.json();
