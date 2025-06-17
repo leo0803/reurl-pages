@@ -1,6 +1,12 @@
 <script>
 (async () => {
   const path = window.location.pathname.replace(/^\/+/, '');
+  const [group, key] = path.split('/');
+  if (!group || !key) {
+    window.location.href = "/blank.html";
+    return;
+  }
+
   const t = Date.now(); // 加這行
 
   const versionURL = `https://leo0803.github.io/reurl-data/version.json?t=${t}`;
@@ -25,7 +31,7 @@
       localStorage.setItem(dataKey, JSON.stringify(data));
       localStorage.setItem(verKey, version);
     } catch (err) {
-   //   window.location.href = "/blank.html";
+      window.location.href = "/blank.html";
       return;
     }
   }
@@ -34,7 +40,7 @@
   if (target) {
     window.location.href = target;
   } else {
- //   window.location.href = "/blank.html";
+    window.location.href = "/blank.html";
   }
 })();
 </script>
