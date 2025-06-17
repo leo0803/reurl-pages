@@ -2,56 +2,42 @@
 (async () => {
   const path = window.location.pathname.replace(/^\/+/, '');
   const [group, key] = path.split('/');
-  console.log('[URL Path]', path);
-  console.log('[Group]', group);
-  console.log('[Key]', key);
-
   if (!group || !key) {
-    console.warn('❌ 群組或代碼格式錯誤');
+    window.location.href = "/blank.html";
     return;
   }
 
   const versionURL = "https://cdn.jsdelivr.net/gh/leo0803/reurl-data@latest/version.json";
   const verKey = `ver_all`;
-  console.log('[Version JSON]', versionURL);
+  const versionRes = await fetch(versionURL);
+  const version = (await versionRes.json()).version;
 
-  try {
-    const versionRes = await fetch(versionURL);
-    const versionJson = await versionRes.json();
-    const version = versionJson.version;
-    console.log('[Version]', version);
+  const cachedVer = localStorage.getItem(verKey);
+  const needRefresh = cachedVer !== version;
 
-    const cachedVer = localStorage.getItem(verKey);
-    const needRefresh = cachedVer !== version;
-    console.log('[Cached Version]', cachedVer);
-    console.log('[Needs Refresh]', needRefresh);
+  const dataKey = `data_${group}`;
+  let data = {};
 
-    const dataKey = `data_${group}`;
-    let data = {};
-
-    if (!needRefresh && localStorage.getItem(dataKey)) {
-      console.log(`[Cache Hit] 使用快取資料`);
-      data = JSON.parse(localStorage.getItem(dataKey));
-    } else {
-      const dataURL = `https://cdn.jsdelivr.net/gh/leo0803/reurl-data@latest/${group}.json?v=${version}`;
-      console.log('[Fetch Data URL]', dataURL);
+  if (!needRefresh && localStorage.getItem(dataKey)) {
+    data = JSON.parse(localStorage.getItem(dataKey));
+  } else {
+    const dataURL = `https://cdn.jsdelivr.net/gh/leo0803/reurl-data@latest/${group}.json?v=${version}`;
+    try {
       const res = await fetch(dataURL);
       data = await res.json();
       localStorage.setItem(dataKey, JSON.stringify(data));
       localStorage.setItem(verKey, version);
+    } catch (err) {
+      window.location.href = "/blank.html";
+      return;
     }
+  }
 
-    console.log('[Data]', data);
-    const target = data[key];
-    console.log('[Target]', target);
-
-    if (target) {
-      window.location.href = target;
-    } else {
-      console.warn('🔍 查無對應轉址');
-    }
-  } catch (err) {
-    console.error('🚫 載入資料失敗', err);
+  const target = data[key];
+  if (target) {
+    window.location.href = target;
+  } else {
+    window.location.href = "/blank.html";
   }
 })();
 </script>
