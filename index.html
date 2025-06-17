@@ -6,17 +6,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>
     (async () => {
-      const path = window.location.pathname.replace(/^\//, '');
-      const parts = path.split('/');
-      if (parts.length < 2) {
+      const path = window.location.pathname.replace(/^\/+/, '');
+      const [group, key] = path.split('/');
+      if (!group || !key) {
         document.body.innerHTML = '<h2>❌ 錯誤：網址格式應為 /群組/代碼</h2>';
         return;
       }
-      const [group, key] = parts;
+
+      const versionURL = "https://cdn.jsdelivr.net/gh/leo0803/reurl-data@latest/version.json";
+      const dataURL = `https://cdn.jsdelivr.net/gh/leo0803/reurl-data@latest/${group}.json`;
+
+      const verKey = `ver_${group}`;
+      const dataKey = `data_${group}`;
+
       try {
-        const res = await fetch("https://cdn.jsdelivr.net/gh/leo0803/reurl-data@latest/shortlinks.json");
-        const data = await res.json();
-        const target = data[group]?.[key];
+        const verRes = await fetch(versionURL);
+        const version = (await verRes.json())[group];
+
+        let data;
+        if (localStorage.getItem(verKey) === version) {
+          data = JSON.parse(localStorage.getItem(dataKey) || '{}');
+        } else {
+          const dataRes = await fetch(dataURL + '?v=' + version); // force update
+          data = await dataRes.json();
+          localStorage.setItem(dataKey, JSON.stringify(data));
+          localStorage.setItem(verKey, version);
+        }
+
+        const target = data[key];
         if (target) {
           window.location.href = target;
         } else {
