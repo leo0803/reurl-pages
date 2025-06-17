@@ -1,1 +1,34 @@
-<h1>Hello from reurl-pages 👋</h1>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>Redirecting...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (async () => {
+      const path = window.location.pathname.replace(/^\//, '');
+      const parts = path.split('/');
+      if (parts.length < 2) {
+        document.body.innerHTML = '<h2>❌ 錯誤：網址格式應為 /群組/代碼</h2>';
+        return;
+      }
+      const [group, key] = parts;
+      try {
+        const res = await fetch("https://cdn.jsdelivr.net/gh/leo0803/reurl-data@latest/shortlinks.json");
+        const data = await res.json();
+        const target = data[group]?.[key];
+        if (target) {
+          window.location.href = target;
+        } else {
+          document.body.innerHTML = '<h2>🔍 查無對應轉址</h2>';
+        }
+      } catch (err) {
+        document.body.innerHTML = '<h2>🚫 載入轉址資料失敗</h2>';
+      }
+    })();
+  </script>
+</head>
+<body>
+  <h1>🔄 正在轉址，請稍候...</h1>
+</body>
+</html>
